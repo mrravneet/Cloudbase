@@ -278,7 +278,7 @@ const Home = () => {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Cloud className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-foreground">CloudBase</span>
+            <span className="text-2xl font-bold text-foreground">Minicloud</span>
           </div>
           <div className="flex items-center space-x-4">
             <Button variant="ghost" onClick={() => navigate("/login")}>
@@ -364,7 +364,7 @@ const Home = () => {
         <div className="container mx-auto text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <Cloud className="h-6 w-6 text-primary" />
-            <span className="text-lg font-semibold text-foreground">CloudBase</span>
+            <span className="text-lg font-semibold text-foreground">Minicloud</span>
           </div>
           <p className="text-muted-foreground">
             © 2024 CloudBase. Your files, your cloud, your way.

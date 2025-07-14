@@ -37,22 +37,7 @@ interface FileItem {
 }
 
 const Dashboard = () => {
-  const [files, setFiles] = useState<FileItem[]>([
-    {
-      id: '1',
-      name: 'Sample Image.jpg',
-      type: 'image',
-      size: '2.4 MB',
-      uploadDate: '2024-01-15'
-    },
-    {
-      id: '2',
-      name: 'Meeting Notes',
-      type: 'note',
-      uploadDate: '2024-01-14',
-      content: 'Important meeting notes about project planning...'
-    }
-  ]);
+  const [files, setFiles] = useState<FileItem[]>([]);
   const [newNote, setNewNote] = useState({ title: "", content: "" });
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -60,18 +45,27 @@ const Dashboard = () => {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video') => {
     const file = event.target.files?.[0];
     if (file) {
-      const newFile: FileItem = {
-        id: Date.now().toString(),
-        name: file.name,
-        type: type,
-        size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
-        uploadDate: new Date().toISOString().split('T')[0]
-      };
-      setFiles([newFile, ...files]);
-      toast({
-        title: "File Uploaded!",
-        description: `${file.name} has been uploaded successfully.`,
-      });
+      try {
+        const newFile: FileItem = {
+          id: Date.now().toString(),
+          name: file.name,
+          type: type,
+          size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+          uploadDate: new Date().toISOString().split('T')[0],
+          content: URL.createObjectURL(file) // For preview
+        };
+        setFiles([newFile, ...files]);
+        toast({
+          title: "File Uploaded!",
+          description: `${file.name} has been uploaded successfully.`,
+        });
+      } catch (error: any) {
+        toast({
+          title: "Upload Error",
+          description: error.message || "Failed to upload file.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -136,17 +130,17 @@ const Dashboard = () => {
               <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-accent animate-glow" />
             </div>
             <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              CloudBase AI
+              Minicloud
             </span>
           </div>
           <div className="flex items-center space-x-4">
-            <Button variant="quantum" size="icon">
+            {/* <Button variant="quantum" size="icon">
               <User className="h-5 w-5" />
             </Button>
             <Button variant="quantum" size="icon">
               <Settings className="h-5 w-5" />
-            </Button>
-            <Button variant="neural" onClick={handleLogout}>
+            </Button> */}
+            <Button variant="quantum" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </Button>
@@ -301,41 +295,64 @@ const Dashboard = () => {
 
           {/* Images Tab */}
           <TabsContent value="images">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {getFilesByType('image').map((file) => (
-                <Card key={file.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        {getFileIcon(file.type)}
-                        <span className="font-medium text-sm">{file.name}</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteFile(file.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="text-xs text-muted-foreground space-y-1">
-                      <p>Size: {file.size}</p>
-                      <p>Uploaded: {file.uploadDate}</p>
-                    </div>
-                    <Button variant="outline" size="sm" className="w-full mt-3">
-                      <Download className="mr-2 h-4 w-4" />
-                      Download
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-              {getFilesByType('image').length === 0 && (
-                <div className="col-span-full text-center py-8">
-                  <Image className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No images uploaded yet.</p>
-                </div>
-              )}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-white/10">
+                <thead className="bg-white rounded-lg shadow-md sticky top-0 z-10">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider rounded-tl-lg">
+                      Thumbnail
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Size
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Upload Date
+                    </th>
+                    <th className="px-6 py-4 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider rounded-tr-lg">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white bg-white">
+                  {getFilesByType('image').map((file) => (
+                    <tr key={file.id}>
+                      <td className="px-6 py-3 whitespace-nowrap text-sm font-medium">
+                        <img className="h-10 w-10 object-cover rounded-md" src={file.content || `https://via.placeholder.com/150`} alt={file.name} />
+                      </td>
+                      <td className="px-6 py-3 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center space-x-2">
+                          {getFileIcon(file.type)}
+                          <span>{file.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-3 whitespace-nowrap text-sm text-muted-foreground">
+                        {file.size}
+                      </td>
+                      <td className="px-6 py-3 whitespace-nowrap text-sm text-muted-foreground">
+                        {file.uploadDate}
+                      </td>
+                        <td className="px-6 py-3 whitespace-nowrap text-right text-sm font-medium">
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteFile(file.id)}>
+                          <Trash2 className="h-5 w-5 text-red-500" />
+                        </Button>
+                        <Button variant="outline" size="icon" className="ml-2">
+                          <Download className="h-5 w-5 text-blue-500" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+            {getFilesByType('image').length === 0 && (
+              <div className="col-span-full text-center py-8">
+                <Image className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No images uploaded yet.</p>
+              </div>
+            )}
           </TabsContent>
 
           {/* Videos Tab */}
