@@ -1,0 +1,209 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Advanced AI Cloud Design System - Neural network inspired */
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 215 25% 27%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 27%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 27%;
+
+    --primary: 240 100% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 240 100% 75%;
+    --primary-deep: 250 90% 45%;
+
+    --secondary: 280 60% 65%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 320 80% 70%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 220 20% 98%;
+    --ring: 240 100% 60%;
+
+    /* Advanced AI gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(240 100% 60%), hsl(280 60% 65%), hsl(320 80% 70%));
+    --gradient-neural: linear-gradient(45deg, hsl(240 100% 60%) 0%, hsl(280 60% 65%) 50%, hsl(320 80% 70%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(210 40% 98%), hsl(240 30% 95%), hsl(280 20% 98%));
+    --gradient-card: linear-gradient(145deg, hsla(0 0% 100% / 0.8), hsla(240 30% 98% / 0.4));
+    --gradient-glass: linear-gradient(135deg, hsla(0 0% 100% / 0.25), hsla(240 30% 98% / 0.05));
+    --gradient-mesh: radial-gradient(circle at 20% 80%, hsl(240 100% 60% / 0.1) 0%, transparent 50%),
+                     radial-gradient(circle at 80% 20%, hsl(320 80% 70% / 0.1) 0%, transparent 50%),
+                     radial-gradient(circle at 40% 40%, hsl(280 60% 65% / 0.1) 0%, transparent 50%);
+    
+    /* Neural network shadows */
+    --shadow-neural: 0 8px 32px -8px hsl(240 100% 60% / 0.3), 0 0 0 1px hsl(240 100% 60% / 0.05);
+    --shadow-glass: 0 8px 32px -8px hsl(240 100% 60% / 0.15), 
+                    0 0 0 1px hsla(0 0% 100% / 0.2),
+                    inset 0 1px 0 hsla(0 0% 100% / 0.4);
+    --shadow-glow: 0 0 40px hsl(240 100% 60% / 0.4), 0 0 80px hsl(320 80% 70% / 0.2);
+    --shadow-depth: 0 20px 40px -12px hsl(240 100% 60% / 0.25), 0 8px 16px -8px hsl(280 60% 65% / 0.2);
+    
+    /* Advanced animations */
+    --transition-neural: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 215 28% 5%;
+    --foreground: 210 40% 98%;
+
+    --card: 220 25% 8%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 220 25% 8%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 240 100% 70%;
+    --primary-foreground: 220 25% 8%;
+    --primary-glow: 240 100% 80%;
+    --primary-deep: 250 90% 55%;
+
+    --secondary: 280 60% 75%;
+    --secondary-foreground: 220 25% 8%;
+
+    --muted: 217 25% 12%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 320 80% 75%;
+    --accent-foreground: 220 25% 8%;
+
+    --destructive: 0 75% 65%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 25% 15%;
+    --input: 217 25% 12%;
+    --ring: 240 100% 70%;
+
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(240 100% 70%), hsl(280 60% 75%), hsl(320 80% 75%));
+    --gradient-neural: linear-gradient(45deg, hsl(240 100% 70%) 0%, hsl(280 60% 75%) 50%, hsl(320 80% 75%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(215 28% 5%), hsl(240 25% 8%), hsl(280 20% 10%));
+    --gradient-card: linear-gradient(145deg, hsla(220 25% 8% / 0.8), hsla(240 30% 12% / 0.4));
+    --gradient-glass: linear-gradient(135deg, hsla(220 25% 15% / 0.3), hsla(240 30% 10% / 0.1));
+    --gradient-mesh: radial-gradient(circle at 20% 80%, hsl(240 100% 70% / 0.15) 0%, transparent 50%),
+                     radial-gradient(circle at 80% 20%, hsl(320 80% 75% / 0.15) 0%, transparent 50%),
+                     radial-gradient(circle at 40% 40%, hsl(280 60% 75% / 0.15) 0%, transparent 50%);
+
+    /* Dark shadows */
+    --shadow-neural: 0 8px 32px -8px hsl(240 100% 70% / 0.4), 0 0 0 1px hsl(240 100% 70% / 0.1);
+    --shadow-glass: 0 8px 32px -8px hsl(240 100% 70% / 0.2), 
+                    0 0 0 1px hsla(220 25% 15% / 0.8),
+                    inset 0 1px 0 hsla(220 25% 20% / 0.6);
+    --shadow-glow: 0 0 40px hsl(240 100% 70% / 0.5), 0 0 80px hsl(320 80% 75% / 0.3);
+    --shadow-depth: 0 20px 40px -12px hsl(240 100% 70% / 0.3), 0 8px 16px -8px hsl(280 60% 75% / 0.25);
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground overflow-x-hidden;
+    background-image: var(--gradient-mesh);
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply relative bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-white/20;
+    box-shadow: var(--shadow-glass);
+  }
+
+  .neural-glow {
+    @apply relative;
+    box-shadow: var(--shadow-neural);
+  }
+
+  .neural-glow::before {
+    content: '';
+    @apply absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-500;
+    background: var(--gradient-neural);
+    z-index: -1;
+  }
+
+  .neural-glow:hover::before {
+    @apply opacity-20;
+  }
+
+  .mesh-bg {
+    background-image: var(--gradient-mesh);
+  }
+
+  .neural-border {
+    @apply relative overflow-hidden;
+  }
+
+  .neural-border::before {
+    content: '';
+    @apply absolute inset-0 p-[1px] rounded-[inherit];
+    background: var(--gradient-neural);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: xor;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+  }
+
+  .floating-particles {
+    @apply relative overflow-hidden;
+  }
+
+  .floating-particles::before {
+    content: '';
+    @apply absolute inset-0 opacity-30;
+    background-image: 
+      radial-gradient(circle at 25% 25%, hsl(240 100% 60% / 0.8) 1px, transparent 1px),
+      radial-gradient(circle at 75% 75%, hsl(320 80% 70% / 0.8) 1px, transparent 1px),
+      radial-gradient(circle at 50% 50%, hsl(280 60% 65% / 0.8) 1px, transparent 1px);
+    background-size: 50px 50px, 80px 80px, 40px 40px;
+    animation: float-particles 20s linear infinite;
+  }
+
+  @keyframes float-particles {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(-100px, -100px) rotate(360deg); }
+  }
+}
