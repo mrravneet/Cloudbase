@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { NeuralCard } from "@/components/ui/neural-card";
+
 import { FloatingElements, NeuralNetwork } from "@/components/ui/floating-elements";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,13 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import ImageCard from "@/components/reusablecomponent/imagecard";
+import VideoCard from "@/components/reusablecomponent/videocard";
+import ImageTable from "@/components/imagetable/imagetable";
+import VideoTable from "@/components/videotable/videotable";
+  
 
 interface FileItem {
   id: string;
@@ -36,11 +43,89 @@ interface FileItem {
   content?: string;
 }
 
+function formatBytes(bytes) {
+  if (bytes === 0 || !bytes) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+
 const Dashboard = () => {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [newNote, setNewNote] = useState({ title: "", content: "" });
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [images, setImages] = useState([]);
+  const [imagesCount, setImagesCount] = useState(0);
+  const [videosCount, setVideosCount] = useState(0);
+  const [notesCount, setNotesCount] = useState(0);
+  const [videos, setVideos] = useState([]);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      const { data, error } = await supabase.storage
+        .from("user-uploads")
+        .list("uploads", { limit: 100, offset: 0 });
+
+      if (error) {
+        console.error("Error fetching images:", error.message);
+        return;
+      }
+
+      // Generate public URLs for each image
+      const imageFiles = data
+        .filter((file) => file.name.match(/\.(jpg|jpeg|png|gif)$/i))
+        .map((file) => {
+          const path = `uploads/${file.name}`;
+          const { data: urlData } = supabase.storage
+            .from("user-uploads")
+            .getPublicUrl(path);
+          return {
+            name: file.name,
+            size: formatBytes(file.metadata?.size),
+            uploadDate: file.created_at || "-",
+            url: urlData.publicUrl,
+          };
+        });
+
+      setImages(imageFiles);
+    };
+
+    fetchImages();
+  }, []);
+
+  useEffect(() => {
+    const fetchVideos = async () => {
+      const { data, error } = await supabase.storage
+        .from("user-uploads")
+        .list("uploads", { limit: 100, offset: 0 });
+
+      if (error) {
+        console.error("Error fetching videos:", error.message);
+        return;
+      }
+
+      const videoFiles = data
+        .filter((file) => file.name.match(/\.(mp4|avi|mov|webm)$/i))
+        .map((file) => {
+          const path = `uploads/${file.name}`;
+          const { data: urlData } = supabase.storage
+            .from("user-uploads")
+            .getPublicUrl(path);
+          return {
+            name: file.name,
+            size: formatBytes(file.metadata?.size),
+            uploadDate: file.created_at || "-",
+            url: urlData.publicUrl,
+          };
+        });
+
+      setVideos(videoFiles);
+    };
+
+    fetchVideos();
+  }, []);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video') => {
     const file = event.target.files?.[0];
@@ -116,11 +201,40 @@ const Dashboard = () => {
     return files.filter(file => file.type === type);
   };
 
+  // Delete image from Supabase and update state
+  const handleDeleteImage = async (fileName) => {
+    const filePath = `uploads/${fileName}`;
+    const { error } = await supabase.storage
+      .from("user-uploads")
+      .remove([filePath]);
+    if (error) {
+      alert("Delete failed: " + error.message);
+      return;
+    }
+    setImages((prev) => prev.filter((img) => img.name !== fileName));
+    alert("Image deleted!");
+  };
+
+  // Download image using the public URL
+  const handleDownloadImage = (url, fileName) => {
+    // Create a temporary link and trigger download
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  console.log('Images:', getFilesByType('image'));
+  console.log('Videos:', getFilesByType('video'));
+
   return (
     <div className="min-h-screen mesh-bg relative overflow-hidden">
       <FloatingElements count={15} />
       <NeuralNetwork />
-      
+       
+     
       {/* Header */}
       <header className="relative z-10 border-b border-white/10 glass-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -180,7 +294,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {getFilesByType('image').length + getFilesByType('video').length}
+                {images.length + videos.length}
               </div>
             </CardContent>
           </Card>
@@ -208,52 +322,11 @@ const Dashboard = () => {
           <TabsContent value="upload" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Image Upload */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Image className="h-5 w-5" />
-                    <span>Upload Images</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <Label htmlFor="image-upload">Choose Image</Label>
-                    <Input
-                      id="image-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileUpload(e, 'image')}
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      Supported formats: JPG, PNG, GIF, WEBP
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <ImageCard />
 
-              {/* Video Upload */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Video className="h-5 w-5" />
-                    <span>Upload Videos</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <Label htmlFor="video-upload">Choose Video</Label>
-                    <Input
-                      id="video-upload"
-                      type="file"
-                      accept="video/*"
-                      onChange={(e) => handleFileUpload(e, 'video')}
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      Supported formats: MP4, AVI, MOV, WEBM
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Video Upload */}  
+              <VideoCard />
+             
             </div>
 
             {/* Create Note */}
@@ -295,59 +368,8 @@ const Dashboard = () => {
 
           {/* Images Tab */}
           <TabsContent value="images">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-white/10">
-                <thead className="bg-white rounded-lg shadow-md sticky top-0 z-10">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider rounded-tl-lg">
-                      Thumbnail
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Size
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Upload Date
-                    </th>
-                    <th className="px-6 py-4 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider rounded-tr-lg">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white bg-white">
-                  {getFilesByType('image').map((file) => (
-                    <tr key={file.id}>
-                      <td className="px-6 py-3 whitespace-nowrap text-sm font-medium">
-                        <img className="h-10 w-10 object-cover rounded-md" src={file.content || `https://via.placeholder.com/150`} alt={file.name} />
-                      </td>
-                      <td className="px-6 py-3 whitespace-nowrap text-sm font-medium">
-                        <div className="flex items-center space-x-2">
-                          {getFileIcon(file.type)}
-                          <span>{file.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-3 whitespace-nowrap text-sm text-muted-foreground">
-                        {file.size}
-                      </td>
-                      <td className="px-6 py-3 whitespace-nowrap text-sm text-muted-foreground">
-                        {file.uploadDate}
-                      </td>
-                        <td className="px-6 py-3 whitespace-nowrap text-right text-sm font-medium">
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteFile(file.id)}>
-                          <Trash2 className="h-5 w-5 text-red-500" />
-                        </Button>
-                        <Button variant="outline" size="icon" className="ml-2">
-                          <Download className="h-5 w-5 text-blue-500" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {getFilesByType('image').length === 0 && (
+            <ImageTable onImageCountChange={setImagesCount} />
+            {images.length === 0 && (
               <div className="col-span-full text-center py-8">
                 <Image className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">No images uploaded yet.</p>
@@ -357,41 +379,7 @@ const Dashboard = () => {
 
           {/* Videos Tab */}
           <TabsContent value="videos">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {getFilesByType('video').map((file) => (
-                <Card key={file.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        {getFileIcon(file.type)}
-                        <span className="font-medium text-sm">{file.name}</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteFile(file.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="text-xs text-muted-foreground space-y-1">
-                      <p>Size: {file.size}</p>
-                      <p>Uploaded: {file.uploadDate}</p>
-                    </div>
-                    <Button variant="outline" size="sm" className="w-full mt-3">
-                      <Download className="mr-2 h-4 w-4" />
-                      Download
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-              {getFilesByType('video').length === 0 && (
-                <div className="col-span-full text-center py-8">
-                  <Video className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No videos uploaded yet.</p>
-                </div>
-              )}
-            </div>
+            <VideoTable onVideoCountChange={setVideosCount} />
           </TabsContent>
 
           {/* Notes Tab */}
